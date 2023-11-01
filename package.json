@@ -1,0 +1,23 @@
+{
+  "name": "gale-cash",
+  "version": "0.1.0",
+  "description": "Simple Tornado Cash clone for CPSC 441 / 551",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha -s 1s -t 5s test/if_then_else.js test/selective_switch.js test/compute_spend_inputs.js test/spend.js"
+  },
+  "license": "GPL-3.0",
+  "dependencies": {
+    "big-integer": "^1.6.47",
+    "chai": "^4.1.0",
+    "chai-as-promised": "^7.1.1",
+    "docopt": "^0.6.2",
+    "circom_tester": "^0.0.19",
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "mocha": "^10.2.0",
+    "snarkjs": "^0.7.0"
+  }
+}
