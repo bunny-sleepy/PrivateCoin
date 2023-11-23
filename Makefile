@@ -1,7 +1,7 @@
 POT_PATH=./powers_of_tau/powersOfTau
-CIRCUIT_PATH=./test/circuits
 ARTIFACT_PATH=./artifacts
 # change name HERE
+CIRCUIT_PATH=./test/circuits
 CIRCUIT_NAME=spend10
 ORDER=13
 
@@ -39,7 +39,7 @@ clean: clean-npm
 	echo "Done"
 
 clean-npm:
-	rm -rf node_modules
+	rm -rf node_modules && rm package-lock.json
 
 bundle: clean
 	rm -f project.zip && zip -r project.zip package.json src test circuits artifacts Makefile
