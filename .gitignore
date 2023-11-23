@@ -1,0 +1,8 @@
+/node_modules
+/powers_of_tau
+/.vscode
+**/circuits/*_js/
+
+package-lock.json
+**/circuits/*.r1cs
+**/circuits/*.sym

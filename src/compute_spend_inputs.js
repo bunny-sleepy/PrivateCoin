@@ -71,8 +71,26 @@ Arguments:
  *       path, casted to string-represented integers ("0" or "1").
  */
 function computeInput(depth, transcript, nullifier) {
-    // TODO
-    return {};
+    let merkle_tree = new SparseMerkleTree(depth);
+    let nonce;
+    for (let t of transcript) {
+        if (t.length == 1) {
+            merkle_tree.insert(t[0]);
+        } else {
+            merkle_tree.insert(mimc2(t[0], t[1]));
+            if (t[0] == nullifier) {
+                nonce = t[1];
+            }
+        }
+    }
+    let path = merkle_tree.path(mimc2(nullifier, nonce).toString());
+    return {
+        "digest"       : merkle_tree.digest,
+        "nullifier"    : nullifier,
+        "nonce"        : nonce,
+        "sibling"      : path.map(node => node[0]),
+        "direction"    : path.map(node => node[1] ? "1" : "0"),
+    };
 }
 
 module.exports = { computeInput };

@@ -15,8 +15,11 @@ template IfThenElse() {
     signal input false_value;
     signal output out;
 
-    // TODO
-    // Hint: You will need a helper signal...
+    // implementation
+    signal tmp;
+    condition * (condition - 1) === 0;
+    tmp <== condition * true_value;
+    out <== tmp + (1 - condition) * false_value;
 }
 
 /*
@@ -33,7 +36,21 @@ template SelectiveSwitch() {
     signal output out0;
     signal output out1;
 
-    // TODO
+    // implementation
+    s * (s - 1) === 0;
+
+    component comp0 = IfThenElse();
+    comp0.condition <== s;
+    comp0.true_value <== in1;
+    comp0.false_value <== in0;
+
+    component comp1 = IfThenElse();
+    comp1.condition <== 1 - s;
+    comp1.true_value <== in1;
+    comp1.false_value <== in0;
+
+    out0 <== comp0.out;
+    out1 <== comp1.out;
 }
 
 /*
@@ -56,6 +73,46 @@ template Spend(depth) {
     signal input nonce; // private
     signal input sibling[depth]; // private
     signal input direction[depth]; // private
-
-    // TODO
+    // hashers for merkle tree
+    component hasher[depth];
+    // hasher for merkle leaf
+    component hasher_leaf = MiMC2();
+    // selective switchers for merkle tree
+    component switcher[depth];
+    // initialize components
+    for (var i = 0; i < depth; i++) {
+        hasher[i] = MiMC2();
+        switcher[i] = SelectiveSwitch();
+    }
+    // assign leaf hashes
+    hasher_leaf.in0 <== nullifier;
+    hasher_leaf.in1 <== nonce;
+    // assign path hashes
+    for (var i = 0; i < depth; i++) {
+        if (i == 0) {
+            switcher[i].in0 <== hasher_leaf.out;
+        } else {
+            switcher[i].in0 <== hasher[i - 1].out;
+        }
+        switcher[i].in1 <== sibling[i];
+        switcher[i].s <== direction[i];
+        hasher[i].in0 <== switcher[i].out0;
+        hasher[i].in1 <== switcher[i].out1;
+    }
+    if (depth == 0) {
+        digest === hasher_leaf.out;
+    } else {
+        digest === hasher[depth - 1].out;
+    }
 }
+
+// template test() {
+//     signal input a;
+//     signal input b;
+//     signal input c;
+//     signal tmp;
+//     tmp <-- (a & 1) * b;
+//     c === tmp;
+// }
+
+// component main {public [digest,nullifier]} = Spend(10);

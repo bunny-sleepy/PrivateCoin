@@ -1,4 +1,4 @@
-Name: []
+Name: [Wenhao Wang]
 
 ## Question 1
 
@@ -13,6 +13,7 @@ signals.
 
 ## Answer 1
 
+In this snippet `sum_of_bits` increments by the product of `2 ** i` and `bits[i]`. Since `2 ** i` are constants for each term in the sum, which are not dependent on `bits[i]` or any other signals or variable, we have that `(2 ** i) * bits[i]` is a linear term. And since this line we only add these linear terms together without performing any multiplications with other signals, `sum_of_bits` remains a linear combination of variables.
 
 ## Question 2
 
@@ -20,6 +21,10 @@ Explain, in your own words, the meaning of the `<==` operator.
 
 ## Answer 2
 
+The meaning of this operator is assign and constrain.
+Suppose the left-hand-side is some signal `x`, and on the right-hand-side is some expression `E`.
+After the `<==` operator, the signal `x` is assigned the value of `E`.
+Meanwhile, the constraint `E - x = 0` is generated in the system.
 
 ## Question 3
 
@@ -36,3 +41,11 @@ Explain why this is invalid.
 
 ## Answer 3
 
+The fundamental reason is that `(a & 1) * b === c` is not a quadratic operation that looks like `A * B + C === 0`, where `A`, `B` and `C` are linear combination of signals.
+Instead, it can be assigned then constrained, like
+
+```
+    signal tmp;
+    tmp <-- (a & 1) * b;
+    c === tmp;
+```
