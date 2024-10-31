@@ -2,11 +2,11 @@ POT_PATH=./powers_of_tau/powersOfTau
 ARTIFACT_PATH=./artifacts
 # change name HERE
 CIRCUIT_PATH=./test/circuits
-CIRCUIT_NAME=spend10
+CIRCUIT_NAME=testsha256
 ORDER=13
 
 0_1_compile:
-	cd ${CIRCUIT_PATH} && circom ${CIRCUIT_NAME}.circom --r1cs --sym --wasm && cd ..
+	cd ${CIRCUIT_PATH} && circom ${CIRCUIT_NAME}.circom --r1cs && cd ..
 
 0_2_ptau:
 	snarkjs powersoftau new bn128 ${ORDER} ${POT_PATH}_${ORDER}_0.ptau -v && snarkjs powersoftau prepare phase2 ${POT_PATH}_${ORDER}_0.ptau ${POT_PATH}_${ORDER}.ptau -v
@@ -34,6 +34,9 @@ ORDER=13
 
 r1cs_info:
 	snarkjs r1cs info ${CIRCUIT_PATH}/$(CIRCUIT_NAME).r1cs
+
+plonk_info:
+	plonkit analyse -c ${CIRCUIT_PATH}/$(CIRCUIT_NAME).r1cs
 
 clean: clean-npm
 	echo "Done"
