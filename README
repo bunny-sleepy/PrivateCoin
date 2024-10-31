@@ -1,0 +1,12 @@
+# Circom Playground
+
+## Big Merkle R1CS and PLONK gate estimation
+
+The big merkle circom implementation is in `test/circuits/testsha256.circom`. You can tweak the params (merkle tree size, number of iterations needed at each step) in that file.
+
+To see the gate estimation, run:
+
+```bash
+> make 0_1_compile
+> make plonk_info
+```
