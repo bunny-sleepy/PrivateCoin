@@ -6,4 +6,4 @@
 package-lock.json
 **/circuits/*.r1cs
 **/circuits/*.sym
-analysis.json
+analyse.json

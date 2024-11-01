@@ -29,34 +29,25 @@ template BigMerkle(log_num_leaves, num_sha_iters_per_subcircuit, inner_hash_size
     var num_leaves = 1 << log_num_leaves;
 
     // Define the signal inputs, which are the leaf data for each leaf node
-    signal input d[num_leaves][256]; // Each leaf is a 256-bit input (32 bytes)
+    signal input d[num_leaves][512]; // Each leaf is a 256-bit input (32 bytes)
 
     // Define the output signal for the root
     signal output root[inner_hash_size]; // Output root, truncated to `inner_hash_size` bits
 
     // Components for leaf hashing, applying iterative SHA256 on each leaf using IteratedHash
     component leaf_hasher[num_leaves];
-    signal leaf_digests[num_leaves][inner_hash_size];
+    // Define components for each level of the Merkle tree
+    component parent_hasher[log_num_leaves][num_leaves / 2];
+    signal level_nodes[log_num_leaves][num_leaves][inner_hash_size];
 
     // Initialize leaf hasher components with IteratedHash
     for (var i = 0; i < num_leaves; i++) {
-        leaf_hasher[i] = IteratedHash(num_sha_iters_per_subcircuit, 256, inner_hash_size);
+        leaf_hasher[i] = IteratedHash(num_sha_iters_per_subcircuit, 512, inner_hash_size);
         leaf_hasher[i].in <== d[i];
 
         // Assign the output to the leaf digest
         for (var k = 0; k < inner_hash_size; k++) {
-            leaf_digests[i][k] <== leaf_hasher[i].out[k];
-        }
-    }
-
-    // Define components for each level of the Merkle tree
-    component parent_hasher[log_num_leaves][num_leaves / 2];
-    signal level_nodes[log_num_leaves + 1][num_leaves][inner_hash_size];
-
-    // Assign the first level with leaf digests
-    for (var i = 0; i < num_leaves; i++) {
-        for (var k = 0; k < inner_hash_size; k++) {
-            level_nodes[0][i][k] <== leaf_digests[i][k];
+            level_nodes[0][i][k] <== leaf_hasher[i].out[k];
         }
     }
 
@@ -79,16 +70,16 @@ template BigMerkle(log_num_leaves, num_sha_iters_per_subcircuit, inner_hash_size
 
             // Assign the output of the parent hash to the next level
             for (var k = 0; k < inner_hash_size; k++) {
-                level_nodes[lvl + 1][i][k] <== parent_hasher[lvl][i].out[k];
+                if (lvl == log_num_leaves - 1) {
+                    // If this is the last level, assign the output to the root
+                    root[k] <== parent_hasher[lvl][i].out[k];
+                } else {
+                    level_nodes[lvl + 1][i][k] <== parent_hasher[lvl][i].out[k];
+                }
             }
         }
 
         cur_level_nodes = next_level_nodes;
-    }
-
-    // Set the root output to the first node in the final level (which is the root)
-    for (var m = 0; m < inner_hash_size; m++) {
-        root[m] <== level_nodes[log_num_leaves][0][m]; // Truncate if necessary to `inner_hash_size`
     }
 }
 
